@@ -5,6 +5,13 @@ type Rule = {
 
 class StringSchema {
     private rules: Rule[] = [];
+    private isOptional: boolean = false;
+
+    optional() {
+        this.isOptional = true;
+
+        return this;
+    }
 
     min(length: number) {
         this.rules.push({
@@ -24,7 +31,13 @@ class StringSchema {
         return this;
     }
 
-    parse(value: unknown): string {
+    parse(value: unknown): string | undefined {
+        if (value === undefined) {
+            if (this.isOptional) return undefined;
+
+            throw new Error('Value is required.');
+        }
+
         if (typeof value !== "string") {
             throw new Error("Type of value should be a string.");
         }
@@ -46,7 +59,7 @@ const zod = {
 function testZod() {
     const form = zod.string().max(100).min(20);
 
-    console.log(form)
+    console.log(form.parse("Hello world hello world"));
 }
 
-testZod()
+testZod();
