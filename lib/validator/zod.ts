@@ -1,5 +1,5 @@
 type Rule = {
-    check: (value: string) => boolean;
+    check: (value: string | number) => boolean;
     message: string;
 };
 
@@ -30,6 +30,14 @@ class BaseSchema {
             throw new Error(`Type of value should be a ${currentType}.`);
         }
     }
+
+    protected execute(value: unknown) {
+        for (let item of this.rules) {
+            if (!item.check(value as string)) {
+                throw new Error(item.message);
+            }
+        }
+    }
 }
 
 class StringSchema extends BaseSchema {
@@ -56,24 +64,53 @@ class StringSchema extends BaseSchema {
 
         this.checkTypeOfValue(value, "string");
 
-        for (let item of this.rules) {
-            if (!item.check(value as string)) {
-                throw new Error(item.message);
-            }
-        }
+        this.execute(value);
 
         return value as string;
     }
 }
 
+class NumberSchema extends BaseSchema {
+    min(minValue: number) {
+        this.rules.push({
+            check: (value: number) => value >= minValue,
+            message: `Value should be at least ${minValue}`,
+        });
+
+        return this;
+    }
+
+    max(maxValue: number) {
+        this.rules.push({
+            check: (value: number) => value <= maxValue,
+            message: `Value should be less than ${maxValue}.`,
+        });
+
+        return this;
+    }
+
+    parse(value: unknown): number | undefined {
+        if (this.checkOptional(value)) return undefined;
+
+        this.checkTypeOfValue(value, "number");
+        this.execute(value);
+
+        return value as number;
+    }
+}
+
 const zod = {
     string: () => new StringSchema(),
+    number: () => new NumberSchema(),
 };
 
 function testZod() {
-    const form = zod.string().max(100).min(20);
+    const stringForm = zod.string().max(100).min(20);
+    console.log(stringForm.parse("Hello world hello world")); // ✅
 
-    console.log(form.parse("Hello world hello world"));
+    const numberForm = zod.number().min(18).max(100);
+    console.log(numberForm.parse(25)); // ✅
+    console.log(numberForm.parse(200)); // ❌ should throw
 }
 
 testZod();
