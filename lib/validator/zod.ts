@@ -3,9 +3,11 @@ type Rule = {
     message: string;
 };
 
-class StringSchema {
-    private rules: Rule[] = [];
-    private isOptional: boolean = false;
+type TypeofResult = "string" | "number" | "boolean" | "object" | "undefined";
+
+class BaseSchema {
+    protected rules: Rule[] = [];
+    protected isOptional: boolean = false;
 
     optional() {
         this.isOptional = true;
@@ -13,6 +15,24 @@ class StringSchema {
         return this;
     }
 
+    protected checkOptional(value: unknown): boolean {
+        if (value === undefined) {
+            if (this.isOptional) return true;
+
+            throw new Error("Value is required.");
+        }
+
+        return false;
+    }
+
+    protected checkTypeOfValue(value: unknown, currentType: TypeofResult) {
+        if (typeof value !== currentType) {
+            throw new Error(`Type of value should be a ${currentType}.`);
+        }
+    }
+}
+
+class StringSchema extends BaseSchema {
     min(length: number) {
         this.rules.push({
             check: (value: string) => value.length >= length,
@@ -32,23 +52,17 @@ class StringSchema {
     }
 
     parse(value: unknown): string | undefined {
-        if (value === undefined) {
-            if (this.isOptional) return undefined;
+        if (this.checkOptional(value)) return undefined;
 
-            throw new Error('Value is required.');
-        }
-
-        if (typeof value !== "string") {
-            throw new Error("Type of value should be a string.");
-        }
+        this.checkTypeOfValue(value, "string");
 
         for (let item of this.rules) {
-            if (!item.check(value)) {
+            if (!item.check(value as string)) {
                 throw new Error(item.message);
             }
         }
 
-        return value;
+        return value as string;
     }
 }
 
