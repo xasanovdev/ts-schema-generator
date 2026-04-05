@@ -1,4 +1,4 @@
-import { ValidationErrors, ValidationRules } from "./types";
+import type { ValidationErrors, ValidationRules } from "./types.ts";
 
 const data = {
     name: "",
