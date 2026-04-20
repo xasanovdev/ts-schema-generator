@@ -99,9 +99,21 @@ class NumberSchema extends BaseSchema<number> {
     }
 }
 
+class BooleanSchema extends BaseSchema<boolean> {
+    parse(value: unknown): boolean | undefined {
+        if (this.checkOptional(value)) return undefined;
+
+        this.checkTypeOfValue(value, "boolean");
+        this.execute(value);
+
+        return value as boolean;
+    }
+}
+
 const zod = {
     string: () => new StringSchema(),
     number: () => new NumberSchema(),
+    boolean: () => new BooleanSchema(),
 };
 
 function testZod() {
@@ -110,7 +122,10 @@ function testZod() {
 
     const numberForm = zod.number().min(18).max(100);
     console.log(numberForm.parse(25)); // ✅
-    console.log(numberForm.parse(200)); // ❌ should throw
+
+    const booleanForm = zod.boolean();
+
+    console.log(booleanForm.parse(false));
 }
 
 testZod();
