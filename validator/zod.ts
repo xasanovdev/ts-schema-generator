@@ -12,6 +12,7 @@ interface ReturnObject {
 type TypeofResult = "string" | "number" | "boolean" | "object" | "undefined";
 
 class BaseSchema<T> {
+    protected typeName!: TypeofResult;
     protected rules: Rule<T>[] = [];
     protected isOptional: boolean = false;
 
@@ -24,8 +25,6 @@ class BaseSchema<T> {
     protected checkOptional(value: unknown): boolean {
         if (value === undefined) {
             if (this.isOptional) return true;
-
-            throw new Error("Value is required.");
         }
 
         return false;
@@ -45,26 +44,6 @@ class BaseSchema<T> {
 
         return errors;
     }
-}
-
-class StringSchema extends BaseSchema<string> {
-    min(length: number) {
-        this.rules.push({
-            check: (value: string) => value.length >= length,
-            message: `Must be at least ${length} characters.`,
-        });
-
-        return this;
-    }
-
-    max(length: number) {
-        this.rules.push({
-            check: (value: string) => value.length <= length,
-            message: `Must be maximum ${length} characters.`,
-        });
-
-        return this;
-    }
 
     parse(value: unknown): ReturnObject {
         if (this.checkOptional(value)) {
@@ -75,11 +54,11 @@ class StringSchema extends BaseSchema<string> {
             };
         }
 
-        if (this.checkTypeOfValue(value, "string")) {
+        if (this.checkTypeOfValue(value, this.typeName)) {
             return {
                 success: false,
                 data: value,
-                errors: [`Type of value should be string.`],
+                errors: [`Type of value should be ${this.typeName}.`],
             };
         }
 
@@ -101,7 +80,31 @@ class StringSchema extends BaseSchema<string> {
     }
 }
 
+class StringSchema extends BaseSchema<string> {
+    protected typeName: TypeofResult = "string";
+
+    min(length: number) {
+        this.rules.push({
+            check: (value: string) => value.length >= length,
+            message: `Must be at least ${length} characters.`,
+        });
+
+        return this;
+    }
+
+    max(length: number) {
+        this.rules.push({
+            check: (value: string) => value.length <= length,
+            message: `Must be maximum ${length} characters.`,
+        });
+
+        return this;
+    }
+}
+
 class NumberSchema extends BaseSchema<number> {
+    protected typeName: TypeofResult = "number";
+
     min(minValue: number) {
         this.rules.push({
             check: (value: number) => value >= minValue,
@@ -119,26 +122,10 @@ class NumberSchema extends BaseSchema<number> {
 
         return this;
     }
-
-    parse(value: unknown): number | undefined {
-        if (this.checkOptional(value)) return undefined;
-
-        this.checkTypeOfValue(value, "number");
-        this.execute(value);
-
-        return value as number;
-    }
 }
 
 class BooleanSchema extends BaseSchema<boolean> {
-    parse(value: unknown): boolean | undefined {
-        if (this.checkOptional(value)) return undefined;
-
-        this.checkTypeOfValue(value, "boolean");
-        this.execute(value);
-
-        return value as boolean;
-    }
+    protected typeName: TypeofResult = "boolean";
 }
 
 const zod = {
