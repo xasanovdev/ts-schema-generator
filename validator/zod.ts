@@ -1,7 +1,13 @@
-type Rule<T> = {
+interface Rule<T> {
     check: (value: T) => boolean;
     message: string;
-};
+}
+
+interface ReturnObject {
+    success: boolean;
+    errors: string[];
+    data: unknown;
+}
 
 type TypeofResult = "string" | "number" | "boolean" | "object" | "undefined";
 
@@ -26,17 +32,18 @@ class BaseSchema<T> {
     }
 
     protected checkTypeOfValue(value: unknown, currentType: TypeofResult) {
-        if (typeof value !== currentType) {
-            throw new Error(`Type of value should be a ${currentType}.`);
-        }
+        return typeof value !== currentType;
     }
 
     protected execute(value: unknown) {
+        let errors = [];
         for (let item of this.rules) {
             if (!item.check(value as T)) {
-                throw new Error(item.message);
+                errors.push(item.message);
             }
         }
+
+        return errors;
     }
 }
 
@@ -59,14 +66,38 @@ class StringSchema extends BaseSchema<string> {
         return this;
     }
 
-    parse(value: unknown): string | undefined {
-        if (this.checkOptional(value)) return undefined;
+    parse(value: unknown): ReturnObject {
+        if (this.checkOptional(value)) {
+            return {
+                success: true,
+                errors: [],
+                data: value,
+            };
+        }
 
-        this.checkTypeOfValue(value, "string");
+        if (this.checkTypeOfValue(value, "string")) {
+            return {
+                success: false,
+                data: value,
+                errors: [`Type of value should be string.`],
+            };
+        }
 
-        this.execute(value);
+        const errors = this.execute(value);
 
-        return value as string;
+        if (errors.length > 0) {
+            return {
+                success: false,
+                data: value,
+                errors,
+            };
+        }
+
+        return {
+            success: true,
+            data: value,
+            errors: [],
+        };
     }
 }
 
@@ -117,15 +148,9 @@ const zod = {
 };
 
 function testZod() {
-    const stringForm = zod.string().max(100).min(20);
-    console.log(stringForm.parse("Hello world hello world")); // ✅
+    const stringForm = zod.string().min(20);
 
-    const numberForm = zod.number().min(18).max(100);
-    console.log(numberForm.parse(25)); // ✅
-
-    const booleanForm = zod.boolean();
-
-    console.log(booleanForm.parse(false));
+    console.log(stringForm.parse("heelll"));
 }
 
 testZod();
