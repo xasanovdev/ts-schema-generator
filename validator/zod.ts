@@ -17,8 +17,6 @@ type ParseResult<T> =
 
 type TypeofResult = "string" | "number" | "boolean" | "object" | "undefined";
 
-type Infer<S> = S extends BaseSchema<infer T> ? T : never;
-
 class BaseSchema<T> {
     protected rules: Rule<T>[] = [];
     protected isOptional: boolean = false;
@@ -147,16 +145,8 @@ class BooleanSchema extends BaseSchema<boolean> {
     }
 }
 
-const zod = {
-    string: () => new StringSchema(),
-    number: () => new NumberSchema(),
-    boolean: () => new BooleanSchema(),
-};
+export type infer<S> = S extends BaseSchema<infer T> ? T : never;
 
-function testZod() {
-    const stringForm = zod.string().min(20);
-
-    console.log(stringForm.parse("heelll"));
-}
-
-testZod();
+export const string = () => new StringSchema();
+export const number = () => new NumberSchema();
+export const boolean = () => new BooleanSchema();
