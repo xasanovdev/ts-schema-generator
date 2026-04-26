@@ -12,9 +12,10 @@ interface ReturnObject {
 type TypeofResult = "string" | "number" | "boolean" | "object" | "undefined";
 
 class BaseSchema<T> {
-    protected typeName!: TypeofResult;
     protected rules: Rule<T>[] = [];
     protected isOptional: boolean = false;
+
+    constructor(protected typeName: TypeofResult) {}
 
     optional() {
         this.isOptional = true;
@@ -81,7 +82,9 @@ class BaseSchema<T> {
 }
 
 class StringSchema extends BaseSchema<string> {
-    protected typeName: TypeofResult = "string";
+    constructor() {
+        super("string");
+    }
 
     min(length: number) {
         this.rules.push({
@@ -103,7 +106,9 @@ class StringSchema extends BaseSchema<string> {
 }
 
 class NumberSchema extends BaseSchema<number> {
-    protected typeName: TypeofResult = "number";
+    constructor() {
+        super("number");
+    }
 
     min(minValue: number) {
         this.rules.push({
@@ -125,7 +130,9 @@ class NumberSchema extends BaseSchema<number> {
 }
 
 class BooleanSchema extends BaseSchema<boolean> {
-    protected typeName: TypeofResult = "boolean";
+    constructor() {
+        super("boolean");
+    }
 }
 
 const zod = {
