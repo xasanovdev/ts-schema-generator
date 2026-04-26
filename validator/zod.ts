@@ -5,25 +5,29 @@ interface Rule<T> {
 
 type ParseResult<T> =
     | {
-          success: boolean;
+          success: false;
           errors: string[];
-          data: T | unknown;
+          data: unknown;
       }
     | {
           success: true;
           errors: [];
-          data: T | unknown;
+          data: T;
       };
 
 type TypeofResult = "string" | "number" | "boolean" | "object" | "undefined";
 
-type Infer<T> = T extends BaseSchema<infer T> ? T : never;
+type Infer<S> = S extends BaseSchema<infer T> ? T : never;
 
 class BaseSchema<T> {
     protected rules: Rule<T>[] = [];
     protected isOptional: boolean = false;
 
-    constructor(protected typeName: TypeofResult) {}
+    protected typeName: TypeofResult;
+
+    constructor(typeName: TypeofResult) {
+        this.typeName = typeName;
+    }
 
     optional() {
         this.isOptional = true;
@@ -54,12 +58,12 @@ class BaseSchema<T> {
         return errors;
     }
 
-    parse(value: unknown): ReturnObject {
+    parse(value: unknown): ParseResult<T> {
         if (this.checkOptional(value)) {
             return {
                 success: true,
                 errors: [],
-                data: value,
+                data: value as T,
             };
         }
 
@@ -83,7 +87,7 @@ class BaseSchema<T> {
 
         return {
             success: true,
-            data: value,
+            data: value as T,
             errors: [],
         };
     }
