@@ -3,13 +3,21 @@ interface Rule<T> {
     message: string;
 }
 
-interface ReturnObject {
-    success: boolean;
-    errors: string[];
-    data: unknown;
-}
+type ParseResult<T> =
+    | {
+          success: boolean;
+          errors: string[];
+          data: T | unknown;
+      }
+    | {
+          success: true;
+          errors: [];
+          data: T | unknown;
+      };
 
 type TypeofResult = "string" | "number" | "boolean" | "object" | "undefined";
+
+type Infer<T> = T extends BaseSchema<infer T> ? T : never;
 
 class BaseSchema<T> {
     protected rules: Rule<T>[] = [];
