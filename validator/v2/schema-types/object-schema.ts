@@ -1,4 +1,4 @@
-import { BaseSchema } from "../base-schema";
+import { BaseSchema } from "./base-schema";
 
 export type Shape = Record<string, BaseSchema<any>>;
 
