@@ -6,4 +6,14 @@ let result = stringSchema.parse("12345");
 
 type resultType = z.infer<typeof stringSchema>; // got 'string' type here
 
-console.log(result);
+const objSchema = z.object({
+    name: z.string(),
+    age: z.number(),
+});
+
+console.log(
+    objSchema.parse({
+        name: "sss",
+        age: "ss",
+    }),
+);
