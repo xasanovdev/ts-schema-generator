@@ -1,9 +1,9 @@
-interface Rule<T> {
+export interface Rule<T> {
     check: (value: T) => boolean;
     message: string;
 }
 
-type ParseResult<T> =
+export type ParseResult<T> =
     | {
           success: false;
           errors: string[];
@@ -15,4 +15,4 @@ type ParseResult<T> =
           data: T;
       };
 
-type TypeofResult = "string" | "number" | "boolean" | "object" | "undefined";
+export type TypeofResult = "string" | "number" | "boolean" | "object" | "undefined";

@@ -1,4 +1,4 @@
-import { BaseSchema } from "../base-schema";
+import { BaseSchema } from "./base-schema";
 
 export class BooleanSchema extends BaseSchema<boolean> {
     constructor() {

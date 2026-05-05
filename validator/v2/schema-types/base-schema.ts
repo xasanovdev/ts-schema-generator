@@ -1,3 +1,5 @@
+import { ParseResult, Rule, TypeofResult } from "../types";
+
 export class BaseSchema<T> {
     protected rules: Rule<T>[] = [];
     protected isOptional: boolean = false;

@@ -1,4 +1,4 @@
-import { BaseSchema } from "./base-schema";
+import { BaseSchema } from "./schema-types/base-schema";
 import { BooleanSchema } from "./schema-types/boolean-schema";
 import { NumberSchema } from "./schema-types/number-schema";
 import { ObjectSchema, Shape } from "./schema-types/object-schema";

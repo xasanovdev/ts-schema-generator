@@ -1,4 +1,4 @@
-import { BaseSchema } from "../base-schema";
+import { BaseSchema } from "./base-schema";
 
 export class NumberSchema extends BaseSchema<number> {
     constructor() {
